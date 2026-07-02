@@ -6,6 +6,8 @@ from typing import List
 from database import get_db
 import models
 import schemas
+from redis_client import get_cached_students, set_cached_students, invalidate_student_cache
+
 app = FastAPI()
 
 app.add_middleware(
@@ -22,7 +24,18 @@ def read_root():
 
 @app.get("/students", response_model=List[schemas.Student])
 def get_students(db: Session = Depends(get_db)):
-    return db.query(models.Student).all()
+    # 1. Try to fetch from Redis Cache
+    cached_data = get_cached_students()
+    if cached_data is not None:
+        return cached_data
+        
+    # 2. Cache miss: Query Postgres
+    students = db.query(models.Student).all()
+    
+    # 3. Store in Redis Cache
+    set_cached_students(students)
+    
+    return students
 
 @app.post("/students", response_model=schemas.Student)
 def add_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
@@ -38,6 +51,10 @@ def add_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     db.add(new_student)
     db.commit()
     db.refresh(new_student)
+    
+    # Invalidate cache since database was modified
+    invalidate_student_cache()
+    
     return new_student
 
 @app.delete("/students/{student_id}")
@@ -48,4 +65,8 @@ def delete_student(student_id: int, db: Session = Depends(get_db)):
     
     db.delete(student)
     db.commit()
+    
+    # Invalidate cache since database was modified
+    invalidate_student_cache()
+    
     return {"message": f"Student with ID {student_id} deleted successfully!"}
