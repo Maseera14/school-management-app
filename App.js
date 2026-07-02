@@ -6,7 +6,9 @@ function App() {
   const [formData, setFormData] = useState({ name: '', roll_no: '', phone_number: '' });
   const [error, setError] = useState('');
 
-  const API_URL = "http://127.0.0.1:8000/students";
+  const API_URL = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL)
+    ? `${process.env.REACT_APP_API_URL}/students`
+    : "http://127.0.0.1:8000/students";
 
   // 1. Fetch Students from Backend
   const fetchStudents = async () => {
