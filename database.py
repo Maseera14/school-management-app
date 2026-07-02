@@ -5,9 +5,11 @@ import os
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:maseera@localhost:5432/school_management_system")
 
-# SQLAlchemy requires postgresql:// instead of postgres:// which some hosts use
+# SQLAlchemy requires postgresql:// instead of postgres:// or the typo stgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+elif DATABASE_URL.startswith("stgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("stgresql://", "postgresql://", 1)
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
