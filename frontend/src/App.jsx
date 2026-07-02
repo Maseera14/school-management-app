@@ -7,9 +7,9 @@ function App() {
   const [formData, setFormData] = useState({ name: '', roll_no: '', phone_number: '' });
   const [error, setError] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL 
-    ? `${import.meta.env.VITE_API_URL}/students` 
-    : "http://127.0.0.1:8000/students";
+  const API_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://127.0.0.1:8000/api/students"
+    : "/api/students";
 
   // 1. Fetch Students from Backend
   const fetchStudents = async () => {

@@ -22,7 +22,7 @@ app.add_middleware(
 def read_root():
     return {"message": "Welcome to the School Management API"}
 
-@app.get("/students", response_model=List[schemas.Student])
+@app.get("/api/students", response_model=List[schemas.Student])
 def get_students(db: Session = Depends(get_db)):
     # 1. Try to fetch from Redis Cache
     cached_data = get_cached_students()
@@ -37,7 +37,7 @@ def get_students(db: Session = Depends(get_db)):
     
     return students
 
-@app.post("/students", response_model=schemas.Student)
+@app.post("/api/students", response_model=schemas.Student)
 def add_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     existing = db.query(models.Student).filter(models.Student.roll_no == student.roll_no).first()
     if existing:
@@ -57,7 +57,7 @@ def add_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     
     return new_student
 
-@app.delete("/students/{student_id}")
+@app.delete("/api/students/{student_id}")
 def delete_student(student_id: int, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not student:
